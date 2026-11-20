@@ -1,101 +1,102 @@
 
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
+const redis = Redis.fromEnv();
 
-// Basic rate limiting
-const rateLimit = new Map<
-  string,
-  { count: number; resetAt: number }
->();
-
-const MAX_SUBMISSIONS = 5;
-const WINDOW_MS = 10 * 60 * 1000;
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "10 m"),
+  prefix: "portfolio-contact",
+});
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
-    const { name, email, subject, message, website } = await request.json();
+    const { name, email, subject, message, website } =
+      await request.json();
 
-// Reject submissions that fill in the hidden honeypot field
-if (website) {
-  return NextResponse.json({ success: true });
-}
+    // Honeypot spam protection
+    if (website) {
+      return NextResponse.json({ success: true });
+    }
 
-    if (!name || !email || !subject || !message) {
+    // Validate field types
+    if (
+      typeof name !== "string" ||
+      typeof email !== "string" ||
+      typeof subject !== "string" ||
+      typeof message !== "string"
+    ) {
+      return NextResponse.json(
+        { error: "Invalid form submission." },
+        { status: 400 }
+      );
+    }
+
+    // Validate required fields
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !subject.trim() ||
+      !message.trim()
+    ) {
       return NextResponse.json(
         { error: "Please complete all fields." },
         { status: 400 }
       );
     }
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(email)) {
-      return NextResponse.json(
-        { error: "Please enter a valid email address." },
-        { status: 400 }
-      );
-    }
-
+    // Validate field lengths
     if (
-      typeof name !== "string" ||
-      typeof email !== "string" ||
-      typeof subject !== "string" ||
-      typeof message !== "string" ||
       name.length > 100 ||
       email.length > 254 ||
       subject.length > 150 ||
       message.length > 5000
     ) {
       return NextResponse.json(
-        { error: "One or more fields are invalid or too long." },
+        { error: "One or more fields are too long." },
         { status: 400 }
       );
     }
 
+    // Validate email address
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(email.trim())) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address." },
+        { status: 400 }
+      );
+    }
 
     // Identify the visitor
-const ip =
-  request.headers.get("x-real-ip") ||
-  request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-  "unknown";
+    const ip =
+      request.headers.get("x-real-ip") ||
+      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+      "unknown";
 
-const now = Date.now();
+    // Check submission limit using Upstash Redis
+    const { success } = await ratelimit.limit(ip);
 
-// Remove expired entries
-for (const [key, value] of rateLimit.entries()) {
-  if (now > value.resetAt) {
-    rateLimit.delete(key);
-  }
-}
+    if (!success) {
+      return NextResponse.json(
+        {
+          error: "Too many messages. Please try again in 10 minutes.",
+        },
+        { status: 429 }
+      );
+    }
 
-const current = rateLimit.get(ip);
-
-// Reject visitors who have exceeded the limit
-if (current && current.count >= MAX_SUBMISSIONS && now < current.resetAt) {
-  return NextResponse.json(
-    { error: "Too many messages. Please try again in a few minutes." },
-    { status: 429 }
-  );
-}
-
-// Record this submission
-if (!current || now >= current.resetAt) {
-  rateLimit.set(ip, {
-    count: 1,
-    resetAt: now + WINDOW_MS,
-  });
-} else {
-  current.count += 1;
-}
-
+    // Send email using Resend
     const { data, error } = await resend.emails.send({
       from: "Portfolio Contact <onboarding@resend.dev>",
       to: [process.env.CONTACT_EMAIL!],
-      replyTo: email,
-      subject: `Portfolio enquiry: ${subject}`,
+      replyTo: email.trim(),
+      subject: `Portfolio enquiry: ${subject.trim()}`,
       text: `
 Name: ${name}
 Email: ${email}
@@ -108,6 +109,7 @@ ${message}
 
     if (error) {
       console.error("Resend error:", error);
+
       return NextResponse.json(
         { error: "Unable to send your message right now." },
         { status: 500 }
@@ -118,6 +120,7 @@ ${message}
       success: true,
       id: data?.id,
     });
+
   } catch (error) {
     console.error("Contact API error:", error);
 
