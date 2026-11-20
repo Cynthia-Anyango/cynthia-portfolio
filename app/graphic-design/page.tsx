@@ -3,7 +3,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles, X } from "lucide-react";
+import {
+  ArrowUpRight,
+  Sparkles,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const categories = [
   "All Work",
@@ -17,7 +23,11 @@ const projects = [
   {
     title: "Brand Identity",
     category: "Brand Identity",
-      image: "/images/graphic-design/branding.jpg",
+      images: [
+        "/images/graphic-design/branding.jpg", 
+        "/images/graphic-design/socials.jpg", 
+
+    ],
     description: "Visual identity concepts, brand elements and creative direction.",
     year: "Selected work",
     background: "bg-[#E7EEE8]",
@@ -29,7 +39,7 @@ const projects = [
   {
     title: "Social Media Creatives",
     category: "Social Media",
-    image: "/images/graphic-design/socials.jpg",
+    images: ["/images/graphic-design/socials.jpg", ],
 
     description: "Digital content designed to communicate, engage and build brand recognition.",
     year: "Selected work",
@@ -42,7 +52,7 @@ const projects = [
   {
     title: "Marketing Posters",
     category: "Posters",
-    image: "/images/graphic-design/posters.jpg",
+    images: [ "/images/graphic-design/posters.jpg", ],
     description: "Promotional posters and marketing materials created for campaigns and events.",
     year: "Selected work",
     background: "bg-[#F2E9DC]",
@@ -54,7 +64,7 @@ const projects = [
   {
     title: "Campaign Graphics",
     category: "Campaigns",
-    image: "/images/graphic-design/campaigns.jpg",
+    images:[ "/images/graphic-design/campaigns.jpg",],
     description: "Visual assets developed to support marketing campaigns and brand initiatives.",
     year: "Selected work",
     background: "bg-[#EAE7F1]",
@@ -100,6 +110,8 @@ export default function GraphicDesignPage() {
 
   const [selectedProject, setSelectedProject] =
   useState<(typeof projects)[number] | null>(null);
+
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const filteredProjects =
     activeCategory === "All Work"
@@ -189,12 +201,15 @@ export default function GraphicDesignPage() {
             {filteredProjects.map((project) => (
               <button
             key={project.title}
-            onClick={() => setSelectedProject(project)}
+           onClick={() => {
+            setSelectedProject(project);
+            setActiveImageIndex(0);
+            }}
             className="group w-full text-left"
             >
             <div className="overflow-hidden rounded-xl bg-white transition duration-500 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-[#142C38]/10">
-                <img
-                src={project.image}
+             <img
+                src={project.images[0]}
                 alt={project.title}
                 className="h-48 w-full object-cover"
                 />
@@ -263,13 +278,80 @@ export default function GraphicDesignPage() {
             </div>
 
             {/* Large Project Image */}
-            <div className="overflow-hidden rounded-2xl bg-white">
+            {/* <div className="overflow-hidden rounded-2xl bg-white">
               <img
                 src={selectedProject.image}
                 alt={selectedProject.title}
                 className="max-h-[65vh] w-full object-contain"
               />
-            </div>
+            </div> */}
+
+
+        {/* Project Image Gallery */}
+<div className="relative overflow-hidden rounded-2xl bg-white">
+
+  <img
+    src={selectedProject.images[activeImageIndex]}
+    alt={`${selectedProject.title} - Image ${activeImageIndex + 1}`}
+    className="max-h-[65vh] min-h-[250px] w-full object-contain"
+  />
+
+  {selectedProject.images.length > 1 && (
+    <>
+      <button
+        onClick={() =>
+          setActiveImageIndex((current) =>
+            current === 0
+              ? selectedProject.images.length - 1
+              : current - 1
+          )
+        }
+        aria-label="Previous image"
+        className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#142C38] shadow-md hover:bg-white"
+      >
+        <ChevronLeft size={22} />
+      </button>
+
+      <button
+        onClick={() =>
+          setActiveImageIndex((current) =>
+            current === selectedProject.images.length - 1
+              ? 0
+              : current + 1
+          )
+        }
+        aria-label="Next image"
+        className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#142C38] shadow-md hover:bg-white"
+      >
+        <ChevronRight size={22} />
+      </button>
+    </>
+  )}
+</div>
+
+{/* Image Counter */}
+<div className="mt-3 flex items-center justify-between">
+  <p className="text-xs text-[#64748B]">
+    Image {activeImageIndex + 1} of {selectedProject.images.length}
+  </p>
+
+  <div className="flex gap-1.5">
+    {selectedProject.images.map((_, index) => (
+      <button
+        key={index}
+        onClick={() => setActiveImageIndex(index)}
+        aria-label={`View image ${index + 1}`}
+        className={`h-2 rounded-full transition-all ${
+          activeImageIndex === index
+            ? "w-6 bg-[#285B51]"
+            : "w-2 bg-[#CBD5D1]"
+        }`}
+      />
+    ))}
+  </div>
+</div>
+
+
 
             <div className="mt-5 flex items-center justify-between border-t border-[#142C38]/10 pt-5">
               <p className="text-xs font-semibold text-[#285B51]">
