@@ -6,7 +6,12 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
-    const { name, email, subject, message } = await request.json();
+    const { name, email, subject, message, website } = await request.json();
+
+// Reject submissions that fill in the hidden honeypot field
+if (website) {
+  return NextResponse.json({ success: true });
+}
 
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
@@ -42,7 +47,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await resend.emails.send({
       from: "Portfolio Contact <onboarding@resend.dev>",
-      to: ["cynthia55.dev@gmail.com"],
+      to: [process.env.CONTACT_EMAIL!],
       replyTo: email,
       subject: `Portfolio enquiry: ${subject}`,
       text: `

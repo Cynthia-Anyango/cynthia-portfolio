@@ -120,6 +120,7 @@ export default function GraphicDesignPage() {
   email: "",
   subject: "",
   message: "",
+  website: "", // Honeypot field for spam protection
 });
 
 const [isSending, setIsSending] = useState(false);
@@ -157,6 +158,7 @@ const handleContactSubmit = async (
       email: "",
       subject: "",
       message: "",
+      website: "", // Reset honeypot field
     });
   } catch (error) {
     setFormStatus(
@@ -627,6 +629,23 @@ const handleContactSubmit = async (
       </p>
 
       <form onSubmit={handleContactSubmit} className="mt-7 space-y-5">
+
+        {/* Honeypot spam protection */}
+        <div className="hidden" aria-hidden="true">
+          <label htmlFor="website">Leave this field empty</label>
+          <input
+            id="website"
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={formData.website || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, website: e.target.value })
+            }
+          />
+        </div>
+
         <div>
           <label className="mb-2 block text-xs font-bold text-[#142C38]">
             Your name
