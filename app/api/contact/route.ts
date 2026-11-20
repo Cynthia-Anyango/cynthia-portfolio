@@ -2,6 +2,16 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
+
+// Basic rate limiting
+const rateLimit = new Map<
+  string,
+  { count: number; resetAt: number }
+>();
+
+const MAX_SUBMISSIONS = 5;
+const WINDOW_MS = 10 * 60 * 1000;
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
@@ -44,6 +54,42 @@ if (website) {
         { status: 400 }
       );
     }
+
+
+    // Identify the visitor
+const ip =
+  request.headers.get("x-real-ip") ||
+  request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+  "unknown";
+
+const now = Date.now();
+
+// Remove expired entries
+for (const [key, value] of rateLimit.entries()) {
+  if (now > value.resetAt) {
+    rateLimit.delete(key);
+  }
+}
+
+const current = rateLimit.get(ip);
+
+// Reject visitors who have exceeded the limit
+if (current && current.count >= MAX_SUBMISSIONS && now < current.resetAt) {
+  return NextResponse.json(
+    { error: "Too many messages. Please try again in a few minutes." },
+    { status: 429 }
+  );
+}
+
+// Record this submission
+if (!current || now >= current.resetAt) {
+  rateLimit.set(ip, {
+    count: 1,
+    resetAt: now + WINDOW_MS,
+  });
+} else {
+  current.count += 1;
+}
 
     const { data, error } = await resend.emails.send({
       from: "Portfolio Contact <onboarding@resend.dev>",
