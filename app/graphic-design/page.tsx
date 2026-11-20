@@ -113,6 +113,64 @@ export default function GraphicDesignPage() {
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
+  const [isContactOpen, setIsContactOpen] = useState(false);
+
+  const [formData, setFormData] = useState({
+  name: "",
+  email: "",
+  subject: "",
+  message: "",
+});
+
+const [isSending, setIsSending] = useState(false);
+const [formStatus, setFormStatus] = useState("");
+
+
+
+
+const handleContactSubmit = async (
+  event: React.FormEvent<HTMLFormElement>
+) => {
+  event.preventDefault();
+  setIsSending(true);
+  setFormStatus("");
+
+  try {
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Unable to send message.");
+    }
+
+    setFormStatus("Your message has been sent successfully!");
+
+    setFormData({
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+    });
+  } catch (error) {
+    setFormStatus(
+      error instanceof Error
+        ? error.message
+        : "Something went wrong. Please try again."
+    );
+  } finally {
+    setIsSending(false);
+  }
+};
+
+
+
   const filteredProjects =
     activeCategory === "All Work"
       ? projects
@@ -514,15 +572,156 @@ export default function GraphicDesignPage() {
               </span>
             </h2>
 
-            <Link
-              href="/contact"
-              className="inline-flex shrink-0 items-center gap-3 self-start rounded-full bg-[#B7D9A2] px-6 py-3.5 text-sm font-bold text-[#142C38] transition hover:bg-white md:self-auto"
-            >
-              Get in touch <ArrowUpRight size={17} />
-            </Link>
+          <button
+            onClick={() => {
+              setFormStatus("");
+              setIsContactOpen(true);
+            }}
+            className="inline-flex shrink-0 items-center gap-3 self-start rounded-full bg-[#B7D9A2] px-6 py-3.5 text-sm font-bold text-[#142C38] transition hover:bg-white md:self-auto"
+          >
+            Get in touch <ArrowUpRight size={17} />
+          </button>
+
+            {/* <button
+            onClick={() => setIsContactOpen(true)}
+            className="inline-flex shrink-0 items-center gap-3 self-start rounded-full bg-[#B7D9A2] px-6 py-3.5 text-sm font-bold text-[#142C38] transition hover:bg-white md:self-auto"
+          >
+            Get in touch <ArrowUpRight size={17} />
+          </button> */}
           </div>
         </div>
       </section>
+
+
+
+{/* Contact Form Modal */}
+{isContactOpen && (
+  <div
+    className="fixed inset-0 z-[60] flex items-center justify-center bg-[#142C38]/80 p-4 backdrop-blur-sm"
+    onClick={() => setIsContactOpen(false)}
+  >
+    <div
+      className="relative max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl bg-[#F5F4EF] p-6 shadow-2xl sm:p-9"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <button
+        type="button"
+        onClick={() => setIsContactOpen(false)}
+        className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#142C38] hover:bg-[#E7EEE8]"
+        aria-label="Close contact form"
+      >
+        <X size={20} />
+      </button>
+
+      <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#285B51]">
+        Let's work together
+      </p>
+
+      <h2 className="mt-3 pr-10 text-3xl font-bold text-[#142C38]">
+        Send me a message.
+      </h2>
+
+      <p className="mt-3 text-sm leading-6 text-[#64748B]">
+        Have a project, collaboration or opportunity in mind?
+        I'd love to hear from you.
+      </p>
+
+      <form onSubmit={handleContactSubmit} className="mt-7 space-y-5">
+        <div>
+          <label className="mb-2 block text-xs font-bold text-[#142C38]">
+            Your name
+          </label>
+          <input
+            type="text"
+            required
+            maxLength={100}
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+            placeholder="Enter your name"
+            className="w-full rounded-xl border border-[#142C38]/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#285B51]"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-bold text-[#142C38]">
+            Email address
+          </label>
+          <input
+            type="email"
+            required
+            maxLength={254}
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+            placeholder="you@example.com"
+            className="w-full rounded-xl border border-[#142C38]/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#285B51]"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-bold text-[#142C38]">
+            Subject
+          </label>
+          <input
+            type="text"
+            required
+            maxLength={150}
+            value={formData.subject}
+            onChange={(e) =>
+              setFormData({ ...formData, subject: e.target.value })
+            }
+            placeholder="What would you like to discuss?"
+            className="w-full rounded-xl border border-[#142C38]/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#285B51]"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-bold text-[#142C38]">
+            Your message
+          </label>
+          <textarea
+            required
+            maxLength={5000}
+            rows={5}
+            value={formData.message}
+            onChange={(e) =>
+              setFormData({ ...formData, message: e.target.value })
+            }
+            placeholder="Tell me a little about your project or enquiry..."
+            className="w-full resize-y rounded-xl border border-[#142C38]/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#285B51]"
+          />
+        </div>
+
+        {formStatus && (
+          <p
+            role="status"
+            className={`rounded-xl p-3 text-sm ${
+              formStatus.includes("successfully")
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {formStatus}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSending}
+          className="flex w-full items-center justify-center gap-3 rounded-full bg-[#142C38] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#285B51] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSending ? "Sending..." : "Send message"}
+          {!isSending && <ArrowUpRight size={17} />}
+        </button>
+      </form>
+    </div>
+  </div>
+)}
+
+
 
       {/* Footer */}
       <footer className="mx-auto flex max-w-7xl flex-col justify-between gap-4 border-t border-[#142C38]/10 px-6 py-8 sm:flex-row sm:items-center">
