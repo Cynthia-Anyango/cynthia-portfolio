@@ -101,26 +101,44 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-[#F5F4EF] text-[#142C38]">
       {/* Navigation */}
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
-        <Link href="/" className="text-sm font-bold tracking-tight">
-          CYNTHIA ANYANGO<span className="text-[#285B51]">.</span>
-        </Link>
+      
+{/* Navigation */}
+<nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
+  <Link href="/" className="text-sm font-bold tracking-tight">
+    CYNTHIA ANYANGO<span className="text-[#285B51]">.</span>
+  </Link>
 
-        <div className="flex items-center gap-5 text-sm font-medium">
-          <Link
-            href="/"
-            className="hidden text-[#64748B] transition hover:text-[#285B51] sm:block"
-          >
-            Home
-          </Link>
-          <Link
-            href="/resume"
-            className="rounded-full border border-[#D5DDD8] px-4 py-2 transition hover:bg-white"
-          >
-            Resume <ArrowUpRight className="ml-1 inline" size={14} />
-          </Link>
-        </div>
-      </nav>
+  <div className="flex items-center gap-5 text-sm font-medium">
+    <Link
+      href="/"
+      className="hidden text-[#64748B] transition hover:text-[#285B51] sm:block"
+    >
+      Home
+    </Link>
+
+    <Link
+      href="/gallery"
+      className="hidden text-[#64748B] transition hover:text-[#285B51] sm:block"
+    >
+      Gallery
+    </Link>
+
+    <Link
+      href="/blog"
+      className="hidden text-[#64748B] transition hover:text-[#285B51] sm:block"
+    >
+      Blog
+    </Link>
+
+    <Link
+      href="/resume"
+      className="rounded-full border border-[#D5DDD8] px-4 py-2 transition hover:bg-white"
+    >
+      Resume <ArrowUpRight className="ml-1 inline" size={14} />
+    </Link>
+  </div>
+</nav>
+
 
       {/* Hero */}
       <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-10 lg:grid-cols-[1fr_0.85fr] lg:px-10 lg:pb-32 lg:pt-16">
@@ -487,22 +505,31 @@ export default function AboutPage() {
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 text-sm text-[#64748B] sm:flex-row">
           <p>Cynthia Anyango · All rights reserved.</p>
 
-          <div className="flex gap-6">
-            <Link href="/" className="transition hover:text-[#285B51]">
-              Home
-            </Link>
-            <Link href="/resume" className="transition hover:text-[#285B51]">
-              Resume
-            </Link>
-            <a
-              href="https://www.linkedin.com/in/cynthia-anyango/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition hover:text-[#285B51]"
-            >
-              LinkedIn
-            </a>
-          </div>
+          
+        <div className="flex flex-wrap gap-6">
+          <Link href="/" className="transition hover:text-[#285B51]">
+            Home
+          </Link>
+          <Link href="/gallery" className="transition hover:text-[#285B51]">
+            Gallery
+          </Link>
+          <Link href="/blog" className="transition hover:text-[#285B51]">
+            Blog
+          </Link>
+          <Link href="/resume" className="transition hover:text-[#285B51]">
+            Resume
+          </Link>
+          <a
+            href="https://www.linkedin.com/in/cynthia-anyango/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition hover:text-[#285B51]"
+          >
+            LinkedIn
+          </a>
+        </div>
+
+
         </div>
       </footer>
     </main>
