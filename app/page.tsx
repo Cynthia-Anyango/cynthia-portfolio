@@ -79,12 +79,24 @@ export default function Home() {
             CA<span className="text-[#285B51]">.</span>
           </Link>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-[#475569] lg:flex">
-            <Link href="#home" className="transition hover:text-[#285B51]">Home</Link>
-            <Link href="#expertise" className="transition hover:text-[#285B51]">Expertise</Link>
-            <Link href="#work" className="transition hover:text-[#285B51]">Selected Work</Link>
-            <Link href="#about" className="transition hover:text-[#285B51]">About</Link>
-          </nav>
+          
+          
+<nav className="hidden items-center gap-7 text-sm font-medium text-[#475569] lg:flex">
+  <Link href="#home" className="transition hover:text-[#285B51]">
+    Home
+  </Link>
+  <Link href="#expertise" className="transition hover:text-[#285B51]">
+    Expertise
+  </Link>
+  <Link href="#work" className="transition hover:text-[#285B51]">
+    Selected Work
+  </Link>
+  <Link href="/about" className="transition hover:text-[#285B51]">
+    About
+  </Link>
+</nav>
+
+
 
           <div className="flex items-center gap-3">
             <Link
@@ -107,7 +119,7 @@ export default function Home() {
           <Link href="#home" className="whitespace-nowrap">Home</Link>
           <Link href="#expertise" className="whitespace-nowrap">Expertise</Link>
           <Link href="#work" className="whitespace-nowrap">Selected Work</Link>
-          <Link href="#about" className="whitespace-nowrap">About</Link>
+          <Link href="/about" className="whitespace-nowrap">About</Link>
           <Link href="/resume" className="whitespace-nowrap text-[#285B51]">Resume ↗</Link>
         </nav>
       </header>
