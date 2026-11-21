@@ -459,7 +459,7 @@ export default function DigitalMarketingPage() {
       </section>
 
       <footer className="border-t border-[var(--color-border)] px-6 py-8 text-center text-sm text-[var(--color-muted)]">
-        © {new Date().getFullYear()} Cynthia Anyango. All rights reserved.
+        © 2026 Cynthia Anyango. All rights reserved.
       </footer>
     </main>
   );

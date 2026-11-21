@@ -425,7 +425,7 @@ export default function Home() {
           </Link>
 
           <p className="text-xs text-[#64748B]">
-            © {new Date().getFullYear()} Cynthia Anyango. All rights reserved.
+            © 2026 Cynthia Anyango. All rights reserved.
           </p>
 
           <div className="flex gap-6 text-xs font-semibold text-[#475569]">
