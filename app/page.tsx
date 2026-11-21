@@ -1,4 +1,8 @@
 
+"use client";
+
+import { useState } from "react";
+import type { FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -9,6 +13,7 @@ import {
   Palette,
   Megaphone,
   Sparkles,
+  X,
 } from "lucide-react";
 
 const disciplines = [
@@ -68,8 +73,65 @@ const projects = [
   },
 ];
 
+
 export default function Home() {
+  const [isContactOpen, setIsContactOpen] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+    website: "",
+  });
+
+  const [isSending, setIsSending] = useState(false);
+  const [formStatus, setFormStatus] = useState("");
+
+  const handleContactSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+    setIsSending(true);
+    setFormStatus("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to send message.");
+      }
+
+      setFormStatus("Your message has been sent successfully!");
+
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+        website: "",
+      });
+    } catch (error) {
+      setFormStatus(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      );
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
+
     <main className="min-h-screen overflow-hidden bg-[#F5F4EF] text-[#142C38]">
 
       {/* NAVIGATION */}
@@ -81,6 +143,7 @@ export default function Home() {
 
           
           
+
 <nav className="hidden items-center gap-7 text-sm font-medium text-[#475569] lg:flex">
   <Link href="#home" className="transition hover:text-[#285B51]">
     Home
@@ -91,10 +154,17 @@ export default function Home() {
   <Link href="#work" className="transition hover:text-[#285B51]">
     Selected Work
   </Link>
+  <Link href="/gallery" className="transition hover:text-[#285B51]">
+    Gallery
+  </Link>
+  <Link href="/blog" className="transition hover:text-[#285B51]">
+    Blog
+  </Link>
   <Link href="/about" className="transition hover:text-[#285B51]">
     About
   </Link>
 </nav>
+
 
 
 
@@ -106,22 +176,30 @@ export default function Home() {
               Resume <ArrowUpRight size={15} className="ml-2" />
             </Link>
 
-            <Link
-              href="#contact"
-              className="rounded-full bg-[#142C38] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#285B51]"
-            >
-              Let's talk <span className="ml-1">↗</span>
-            </Link>
+                      <button
+            type="button"
+            onClick={() => {
+              setFormStatus("");
+              setIsContactOpen(true);
+            }}
+            className="rounded-full bg-[#142C38] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#285B51]"
+          >
+            Let's talk <span className="ml-1">↗</span>
+          </button>
           </div>
         </div>
 
-        <nav className="flex gap-6 overflow-x-auto border-t border-[#142C38]/5 px-6 py-3 text-xs font-medium text-[#64748B] lg:hidden md:px-12">
-          <Link href="#home" className="whitespace-nowrap">Home</Link>
-          <Link href="#expertise" className="whitespace-nowrap">Expertise</Link>
-          <Link href="#work" className="whitespace-nowrap">Selected Work</Link>
-          <Link href="/about" className="whitespace-nowrap">About</Link>
-          <Link href="/resume" className="whitespace-nowrap text-[#285B51]">Resume ↗</Link>
-        </nav>
+      {/* MOBILE NAVIGATION  */}
+<nav className="flex gap-6 overflow-x-auto border-t border-[#142C38]/5 px-6 py-3 text-xs font-medium text-[#64748B] lg:hidden md:px-12">
+  <Link href="#home" className="whitespace-nowrap">Home</Link>
+  <Link href="#expertise" className="whitespace-nowrap">Expertise</Link>
+  <Link href="#work" className="whitespace-nowrap">Selected Work</Link>
+  <Link href="/gallery" className="whitespace-nowrap">Gallery</Link>
+  <Link href="/blog" className="whitespace-nowrap">Blog</Link>
+  <Link href="/about" className="whitespace-nowrap">About</Link>
+  <Link href="/resume" className="whitespace-nowrap text-[#285B51]">Resume ↗</Link>
+</nav>
+
       </header>
 
       {/* HERO */}
@@ -417,17 +495,168 @@ export default function Home() {
               </span>
             </h2>
 
-            <Link
-              href="https://www.linkedin.com/in/cynthia-anyango/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex w-fit items-center gap-3 rounded-full bg-[#142C38] px-7 py-4 text-sm font-bold text-white transition hover:bg-[#285B51]"
-            >
-              Connect with me <ArrowUpRight size={18} />
-            </Link>
+            
+          <button
+            type="button"
+            onClick={() => {
+              setFormStatus("");
+              setIsContactOpen(true);
+            }}
+            className="inline-flex w-fit items-center gap-3 rounded-full bg-[#142C38] px-7 py-4 text-sm font-bold text-white transition hover:bg-[#285B51]"
+          >
+            Connect with me <ArrowUpRight size={18} />
+          </button>
+
           </div>
         </div>
       </section>
+
+
+
+{/* CONTACT FORM MODAL */}
+{isContactOpen && (
+  <div
+    className="fixed inset-0 z-[60] flex items-center justify-center bg-[#142C38]/80 p-4 backdrop-blur-sm"
+    onClick={() => setIsContactOpen(false)}
+  >
+    <div
+      className="relative max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl bg-[#F5F4EF] p-6 shadow-2xl sm:p-9"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <button
+        type="button"
+        onClick={() => setIsContactOpen(false)}
+        className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#142C38] hover:bg-[#E7EEE8]"
+        aria-label="Close contact form"
+      >
+        <X size={20} />
+      </button>
+
+      <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#285B51]">
+        Let's work together
+      </p>
+
+      <h2 className="mt-3 pr-10 text-3xl font-bold text-[#142C38]">
+        Send me a message.
+      </h2>
+
+      <p className="mt-3 text-sm leading-6 text-[#64748B]">
+        Have a project, collaboration or opportunity in mind?
+        I'd love to hear from you.
+      </p>
+
+      <form onSubmit={handleContactSubmit} className="mt-7 space-y-5">
+
+        {/* Honeypot spam protection */}
+        <div className="hidden" aria-hidden="true">
+          <label htmlFor="home-website">Leave this field empty</label>
+          <input
+            id="home-website"
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={formData.website}
+            onChange={(e) =>
+              setFormData({ ...formData, website: e.target.value })
+            }
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-bold text-[#142C38]">
+            Your name
+          </label>
+          <input
+            type="text"
+            required
+            maxLength={100}
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+            placeholder="Enter your name"
+            className="w-full rounded-xl border border-[#142C38]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#285B51]"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-bold text-[#142C38]">
+            Email address
+          </label>
+          <input
+            type="email"
+            required
+            maxLength={254}
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+            placeholder="you@example.com"
+            className="w-full rounded-xl border border-[#142C38]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#285B51]"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-bold text-[#142C38]">
+            Subject
+          </label>
+          <input
+            type="text"
+            required
+            maxLength={150}
+            value={formData.subject}
+            onChange={(e) =>
+              setFormData({ ...formData, subject: e.target.value })
+            }
+            placeholder="What would you like to discuss?"
+            className="w-full rounded-xl border border-[#142C38]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#285B51]"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-bold text-[#142C38]">
+            Your message
+          </label>
+          <textarea
+            required
+            maxLength={5000}
+            rows={5}
+            value={formData.message}
+            onChange={(e) =>
+              setFormData({ ...formData, message: e.target.value })
+            }
+            placeholder="Tell me about your project or enquiry..."
+            className="w-full resize-y rounded-xl border border-[#142C38]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#285B51]"
+          />
+        </div>
+
+        {formStatus && (
+          <p
+            role="status"
+            className={`rounded-xl p-3 text-sm ${
+              formStatus.includes("successfully")
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {formStatus}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSending}
+          className="flex w-full items-center justify-center gap-3 rounded-full bg-[#142C38] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#285B51] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSending ? "Sending..." : "Send message"}
+          {!isSending && <ArrowUpRight size={17} />}
+        </button>
+      </form>
+    </div>
+  </div>
+)}
+
 
       {/* FOOTER */}
       <footer className="border-t border-[#142C38]/10 px-6 py-8 md:px-12">
